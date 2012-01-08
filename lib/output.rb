@@ -24,12 +24,18 @@ class Output
     
     @input_path = Array.new
     @output_path = Array.new
+
+    @root_page = Page.new
+    @root_page.directory_path = @output_path
+    @root_page.level = -1
     
-    process_directory @input_repo
+    process_directory @input_repo, @root_page
+
+    create_file "../../view/toc.haml", @output_dir + "/toc.html"
   end
 
-  def process_directory dir
-    Dir.foreach dir do |entry|
+  def process_directory dir, parent_page
+    Dir.entries( dir ).sort.each do |entry|
       if entry =~ /^\d\d\d_(.*)$/
         input_name = $1
         full_name = input_path + "/" + entry
@@ -39,12 +45,28 @@ class Output
           if !File.exists? output_path
             Dir.mkdir output_path
           end
-          process_directory full_name
+
+          @page = Page.new
+          parent_page.add_child @page
+          @page.directory_path = full_name
+          
+          process_directory full_name, @page
           @input_path.pop
           @output_path.pop
         else
-          @content = File.read( input_path + "/" + entry )          
-          create_file input_name
+          @page = Page.new
+          parent_page.add_child @page
+          @page.path = input_path + "/" + entry
+          
+          @content = File.read( input_path + "/" + entry )
+          @content.each_line do |line|
+            if line =~ /^# (.*)$/
+              @page.title = $1
+              break
+            end
+          end
+          
+          create_page input_name
         end
       elsif entry =~ /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
@@ -61,36 +83,43 @@ class Output
     @output_dir + "/" + @output_path.join( "/" )
   end
   
-  def create_file input_name
+  def create_page input_name
     if input_name =~ /^(.*)\.(.*)$/
       file_basename = $1
       file_format = $2
       if file_format != "md"
         raise ParseError "Unsupported format '#{file_format}' in file " +
           "#{input_name}."
-      end      
+      end
     else
       raise ParseError "Input file #{input_name} doesn't have an extension."
     end
 
-    template_name = "../../view/template.haml"
-    template = File.read File.expand_path(template_name, __FILE__)
-    engine = Haml::Engine.new template
+    if ( @output_path.empty? )
+      @page.target = file_basename + ".html"
+    else
+      @page.target = @output_path.join( "/" ) + "/#{file_basename}.html"
+    end
 
     output_filename = output_path + "/" + file_basename + ".html"
+    create_file "../../view/template.haml", output_filename
+  end
+  
+  def create_file template_name, output_filename
+    template = File.read File.expand_path(template_name, __FILE__)
+    engine = Haml::Engine.new template
     
     File.open output_filename, "w" do |file|
       file.puts engine.render( binding )
     end
   end
-  
+
   def css
     File.read File.expand_path("../../view/helphelp.css",__FILE__)
   end
 
   def title
-    # FIXME: Extract title from page
-    "SUSE Studio Online Help"
+    @page.title
   end
   
   def render_content
@@ -102,6 +131,40 @@ class Output
     @out
   end
 
+  def render_toc
+    @out = ""
+
+    on "<h1>Table of contents</h1>"
+    render_toc_section @root_page
+
+    @out
+  end
+  
+  def render_toc_section parent_page
+    on "<ul>"
+    parent_page.children.each do |page|
+      o "<li>"
+      if page.title && !page.title.empty?
+        o "<a href='#{page.target}'>#{page.title}</a>"
+      end
+      on "</li>"
+      if page.has_children?        
+        render_toc_section page
+      end
+    end
+    on "</ul>"
+  end
+  
+  def relative_site_root
+    @out = ""
+
+    @page.level.times do
+      @out += "../"
+    end
+    
+    @out
+  end
+  
   protected
   
   def o txt
