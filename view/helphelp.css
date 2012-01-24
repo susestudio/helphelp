@@ -8158,3 +8158,7 @@ div.content hr {
 div.navigation {
   display: none;
 }
+
+#aside-toc h1 {
+  display: none;
+}
