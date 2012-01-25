@@ -31,6 +31,8 @@ class Output
     
     process_directory @input_repo, @root_page
 
+    create_pages @root_page
+    
     create_file "../../view/toc.haml", @output_dir + "/toc.html"
   end
 
@@ -58,19 +60,42 @@ class Output
           parent_page.add_child @page
           @page.path = input_path + "/" + entry
           
-          @content = File.read( input_path + "/" + entry )
-          @content.each_line do |line|
-            if line =~ /^# (.*)$/
-              @page.title = $1
-              break
+          @page.content = File.read( input_path + "/" + entry )
+
+          if input_name =~ /^(.*)\.(.*)$/
+            file_basename = $1
+            file_format = $2
+            if file_format != "md"
+              raise ParseError "Unsupported format '#{file_format}' in file " +
+                "#{input_name}."
             end
+            @page.file_format = file_format
+          else
+            raise ParseError "Input file #{input_name} doesn't have an
+extension."
           end
-          
-          create_page input_name
+
+          output_file_name = file_basename + ".html"
+          if ( @output_path.empty? )
+            @page.target = output_file_name
+          else
+            @page.target = @output_path.join( "/" ) + "/" + output_file_name
+          end
+          @page.output_file = output_path + "/" + output_file_name
         end
       elsif entry =~ /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
         system cmd
+      end
+    end
+  end
+
+  def create_pages parent_page
+    parent_page.children.each do |page|
+      if page.children.empty?
+        create_page page
+      else
+        create_pages page
       end
     end
   end
@@ -83,26 +108,10 @@ class Output
     @output_dir + "/" + @output_path.join( "/" )
   end
   
-  def create_page input_name
-    if input_name =~ /^(.*)\.(.*)$/
-      file_basename = $1
-      file_format = $2
-      if file_format != "md"
-        raise ParseError "Unsupported format '#{file_format}' in file " +
-          "#{input_name}."
-      end
-    else
-      raise ParseError "Input file #{input_name} doesn't have an extension."
-    end
-
-    if ( @output_path.empty? )
-      @page.target = file_basename + ".html"
-    else
-      @page.target = @output_path.join( "/" ) + "/#{file_basename}.html"
-    end
-
-    output_filename = output_path + "/" + file_basename + ".html"
-    create_file "../../view/template.haml", output_filename
+  def create_page page
+    puts "CREATE PAGE #{page.path} #{page.output_file}"
+    @content = page.content
+    create_file "../../view/template.haml", page.output_file
   end
   
   def create_file template_name, output_filename
