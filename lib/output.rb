@@ -46,20 +46,16 @@ class Output
             Dir.mkdir output_path
           end
 
-          @page = Page.new
-          parent_page.add_child @page
-          @page.directory_path = full_name
+          page = Page.new
+          parent_page.add_child page
+          page.directory_path = full_name
           
-          process_directory full_name, @page
+          process_directory full_name, page
           @input_path.pop
           @output_path.pop
         else
-          @page = Page.new
-          parent_page.add_child @page
-          @page.path = input_path + "/" + entry
-          
-          @page.content = File.read( input_path + "/" + entry )
-
+          file_basename = nil
+          file_format = nil
           if input_name =~ /^(.*)\.(.*)$/
             file_basename = $1
             file_format = $2
@@ -67,19 +63,30 @@ class Output
               raise ParseError "Unsupported format '#{file_format}' in file " +
                 "#{input_name}."
             end
-            @page.file_format = file_format
           else
             raise ParseError "Input file #{input_name} doesn't have an
 extension."
           end
 
+          page = nil
+          if file_basename == "index"
+            page = parent_page
+          else
+            page = Page.new
+            parent_page.add_child page
+          end
+            
+          page.path = input_path + "/" + entry
+          page.content = File.read( input_path + "/" + entry )
+          page.file_format = file_format
+
           output_file_name = file_basename + ".html"
           if ( @output_path.empty? )
-            @page.target = output_file_name
+            page.target = output_file_name
           else
-            @page.target = @output_path.join( "/" ) + "/" + output_file_name
+            page.target = @output_path.join( "/" ) + "/" + output_file_name
           end
-          @page.output_file = output_path + "/" + output_file_name
+          page.output_file = output_path + "/" + output_file_name
         end
       elsif entry =~ /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
@@ -90,11 +97,10 @@ extension."
 
   def create_pages parent_page
     parent_page.children.each do |page|
-      if page.children.empty?
+      if page.content
         create_page page
-      else
-        create_pages page
       end
+      create_pages page
     end
   end
 
