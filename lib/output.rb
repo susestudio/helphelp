@@ -114,8 +114,8 @@ class Output
     end
   end
 
-  def css
-    File.read File.expand_path("../../view/helphelp.css",__FILE__)
+  def css name
+    "<link rel='stylesheet' href='public/#{name}.css' type='text/css'>"
   end
 
   def title

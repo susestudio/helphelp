@@ -1,6 +1,5 @@
 # To do
 
-* Don't embed CSS, but link it externally
 * Add index pages for directories
 * Fix generation of toc on main index page
 * Fix links of toc on subdirectory pages
