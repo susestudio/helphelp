@@ -32,8 +32,6 @@ class Output
     process_directory @input_repo, @root_page
 
     create_pages @root_page
-    
-    create_file "../../view/toc.haml", @output_dir + "/toc.html"
   end
 
   def process_directory dir, parent_page
