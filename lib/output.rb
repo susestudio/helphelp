@@ -110,7 +110,7 @@ extension."
   
   def create_page page
     puts "CREATE PAGE #{page.path} #{page.output_file}"
-    @content = page.content
+    @page = page
     create_file "../../view/template.haml", page.output_file
   end
   
@@ -124,7 +124,8 @@ extension."
   end
 
   def css name
-    "<link rel='stylesheet' href='public/#{name}.css' type='text/css'>"
+    "<link rel='stylesheet' href='#{relative_site_root}public/#{name}.css'" + 
+    " type='text/css'>"
   end
 
   def title
@@ -134,7 +135,7 @@ extension."
   def render_content
     @out = ""
 
-    doc = Maruku.new @content
+    doc = Maruku.new @page.content
     o doc.to_html
 
     @out
