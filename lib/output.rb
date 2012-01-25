@@ -155,7 +155,7 @@ extension."
     parent_page.children.each do |page|
       o "<li>"
       if page.title && !page.title.empty?
-        o "<a href='#{page.target}'>#{page.title}</a>"
+        o "<a href='#{relative_site_root}#{page.target}'>#{page.title}</a>"
       end
       on "</li>"
       if page.has_children?        
@@ -166,13 +166,13 @@ extension."
   end
   
   def relative_site_root
-    @out = ""
+    out = ""
 
     @page.level.times do
-      @out += "../"
+      out += "../"
     end
     
-    @out
+    out
   end
   
   protected
