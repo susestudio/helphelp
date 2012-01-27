@@ -8100,7 +8100,7 @@ pre {
 
 aside {
   float: right;
-  width: 400px;
+  width: 340px;
 }
 .aside-box ul, .aside-box li {
   list-style: none outside;
@@ -8148,9 +8148,19 @@ aside {
   background: #eee;
 }
 .content {
-  width: 560px;
+  width: 600px;
 }
-
+  /* Text Styles for Help-Text */
+  .content h1 {
+    font-size: 170%;
+    margin-top: 2em;
+  }
+  .content,
+  .content p {
+    font-size: 1.05em;
+    line-height: 1.7em;
+  }
+  
 div.content hr {
   clear: none;
 }
