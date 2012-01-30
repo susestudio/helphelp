@@ -31,7 +31,7 @@ class Output
     
     process_directory @input_repo, @root_page
 
-    create_file "../../view/toc.haml", @output_dir + "/toc.html"
+    create_pages @root_page
   end
 
   def process_directory dir, parent_page
@@ -46,32 +46,61 @@ class Output
             Dir.mkdir output_path
           end
 
-          @page = Page.new
-          parent_page.add_child @page
-          @page.directory_path = full_name
+          page = Page.new
+          parent_page.add_child page
+          page.directory_path = full_name
           
-          process_directory full_name, @page
+          process_directory full_name, page
           @input_path.pop
           @output_path.pop
         else
-          @page = Page.new
-          parent_page.add_child @page
-          @page.path = input_path + "/" + entry
-          
-          @content = File.read( input_path + "/" + entry )
-          @content.each_line do |line|
-            if line =~ /^# (.*)$/
-              @page.title = $1
-              break
+          file_basename = nil
+          file_format = nil
+          if input_name =~ /^(.*)\.(.*)$/
+            file_basename = $1
+            file_format = $2
+            if file_format != "md"
+              raise ParseError "Unsupported format '#{file_format}' in file " +
+                "#{input_name}."
             end
+          else
+            raise ParseError "Input file #{input_name} doesn't have an
+extension."
           end
-          
-          create_page input_name
+
+          page = nil
+          if file_basename == "index"
+            page = parent_page
+          else
+            page = Page.new
+            parent_page.add_child page
+          end
+            
+          page.path = input_path + "/" + entry
+          page.content = File.read( input_path + "/" + entry )
+          page.file_format = file_format
+
+          output_file_name = file_basename + ".html"
+          if ( @output_path.empty? )
+            page.target = output_file_name
+          else
+            page.target = @output_path.join( "/" ) + "/" + output_file_name
+          end
+          page.output_file = output_path + "/" + output_file_name
         end
       elsif entry =~ /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
         system cmd
       end
+    end
+  end
+
+  def create_pages parent_page
+    parent_page.children.each do |page|
+      if page.content
+        create_page page
+      end
+      create_pages page
     end
   end
 
@@ -83,26 +112,10 @@ class Output
     @output_dir + "/" + @output_path.join( "/" )
   end
   
-  def create_page input_name
-    if input_name =~ /^(.*)\.(.*)$/
-      file_basename = $1
-      file_format = $2
-      if file_format != "md"
-        raise ParseError "Unsupported format '#{file_format}' in file " +
-          "#{input_name}."
-      end
-    else
-      raise ParseError "Input file #{input_name} doesn't have an extension."
-    end
-
-    if ( @output_path.empty? )
-      @page.target = file_basename + ".html"
-    else
-      @page.target = @output_path.join( "/" ) + "/#{file_basename}.html"
-    end
-
-    output_filename = output_path + "/" + file_basename + ".html"
-    create_file "../../view/template.haml", output_filename
+  def create_page page
+    puts "CREATE PAGE #{page.path} #{page.output_file}"
+    @page = page
+    create_file "../../view/template.haml", page.output_file
   end
   
   def create_file template_name, output_filename
@@ -114,8 +127,9 @@ class Output
     end
   end
 
-  def css
-    File.read File.expand_path("../../view/helphelp.css",__FILE__)
+  def css name
+    "<link rel='stylesheet' href='#{relative_site_root}public/#{name}.css'" + 
+    " type='text/css'>"
   end
 
   def title
@@ -125,7 +139,7 @@ class Output
   def render_content
     @out = ""
 
-    doc = Maruku.new @content
+    doc = Maruku.new @page.content
     o doc.to_html
 
     @out
@@ -145,7 +159,7 @@ class Output
     parent_page.children.each do |page|
       o "<li>"
       if page.title && !page.title.empty?
-        o "<a href='#{page.target}'>#{page.title}</a>"
+        o "<a href='#{relative_site_root}#{page.target}'>#{page.title}</a>"
       end
       on "</li>"
       if page.has_children?        
@@ -156,13 +170,13 @@ class Output
   end
   
   def relative_site_root
-    @out = ""
+    out = ""
 
     @page.level.times do
-      @out += "../"
+      out += "../"
     end
     
-    @out
+    out
   end
   
   protected
