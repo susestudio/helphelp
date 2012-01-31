@@ -8174,7 +8174,8 @@ aside {
     -webkit-box-shadow: 0 1px 2px #999;
   }
   
-  .content img + em {
+  .content img + em,
+  .content table + p em {
     font-size: 0.8em;
     color: #777;
   }
