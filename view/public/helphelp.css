@@ -8096,6 +8096,7 @@ pre {
   padding: 0.5em;
   overflow-x: auto;
   width: auto;
+  white-space: pre-line;
 }
 
 aside {
