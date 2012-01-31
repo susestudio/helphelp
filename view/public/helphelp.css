@@ -8179,9 +8179,21 @@ aside {
     color: #777;
   }
   
-div.content hr {
-  clear: none;
-}
+  
+  div.content hr {
+    clear: none;
+  }
+  
+  /* Rudimentary Table Styles */
+  .content table {
+    width: 100%;
+  }
+  .content thead {
+    border-bottom: 1px solid #999;
+  }
+  .content tr:nth-child(even) {
+    background-color: #eee;
+  }
 
 div.navigation {
   display: none;
