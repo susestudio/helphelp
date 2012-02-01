@@ -8092,11 +8092,14 @@ pre, tt, code {
   background-color: #eee;
 }
 
-pre {
+pre, code {
   padding: 0.5em;
   overflow-x: auto;
   width: auto;
   white-space: pre-line;
+}
+code {
+  padding: 2px;
 }
 
 aside {
@@ -8155,6 +8158,10 @@ aside {
   .content h1, .content h2, .content h3, .content h4 {
     font-size: 170%;
     margin-top: 2em;
+  }
+  .content h1 + h2 {
+    margin-top: 1em;
+    padding-top: 0;
   }
   .content h2,
   .content h3,
