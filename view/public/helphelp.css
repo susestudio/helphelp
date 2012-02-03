@@ -8157,13 +8157,22 @@ aside {
   /* Text Styles for Help-Text */
   .content h1, .content h2, .content h3, .content h4 {
     font-size: 170%;
-    margin-top: 2em;
+    margin-top: 0em;
+    line-height: 1.4em;
+  }
+  .content h1:first-child {
+    margin-top: 0;
   }
   .content h1 + h2 {
     margin-top: 1em;
     padding-top: 0;
   }
-  .content h2,
+  .content h2 {
+    font-size: 160%;
+    margin-bottom: 0.5em;
+    padding-bottom: 0;
+  }
+  
   .content h3,
   .content h4 {
     font-size: 150%;
@@ -8176,9 +8185,9 @@ aside {
   }
   
   .content img {
-    box-shadow: 0 1px 2px #999;
-    -moz-box-shadow: 0 1px 2px #999;
-    -webkit-box-shadow: 0 1px 2px #999;
+    box-shadow: 0 0px 5px #999;
+    -moz-box-shadow: 0 0px 5px #999;
+    -webkit-box-shadow: 0 0px 5px #999;
   }
   
   .content img + em,
