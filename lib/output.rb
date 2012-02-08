@@ -2,6 +2,8 @@ class Output
 
   def initialize input_repo
     @input_repo = input_repo
+    
+    @content_width = 600
   end
 
   def create output_dir
@@ -90,6 +92,9 @@ extension."
         end
       elsif entry =~ /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
+        system cmd
+        cmd = "mogrify -resize #{@content_width}x5000 #{output_path}/#{entry}"
+        STDERR.puts "MOGRIFY: #{cmd}"
         system cmd
       end
     end
