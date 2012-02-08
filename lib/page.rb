@@ -1,7 +1,8 @@
 class Page
 
   attr_accessor :children, :directory_path, :path, :target, :level,
-    :content, :file_format, :output_file
+    :file_format, :output_file
+  attr_reader :content, :title
   
   def initialize
     @level = 0
@@ -17,17 +18,21 @@ class Page
     !@children.empty?
   end
 
-  def title
-    if !@title_processed && @content
-      @content.each_line do |line|
-        if line =~ /^# (.*)$/
-          @title = $1
-          break
-        end
+  def content= content
+    @content = preprocess content
+  end
+
+  protected
+  
+  def preprocess content
+    out = ""
+    content.each_line do |line|
+      out += line
+      if !@title && line =~ /^# (.*)$/
+        @title = $1
       end
-      @title_processed = true
     end
-    @title
+    out
   end
   
 end
