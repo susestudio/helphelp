@@ -33,9 +33,18 @@ class Output
     
     process_directory @input_repo, @root_page
 
+    postprocess_page @root_page
+    
     create_pages @root_page
   end
 
+  def postprocess_page parent_page
+    parent_page.postprocess
+    parent_page.children.each do |page|
+      postprocess_page page
+    end
+  end
+  
   def process_directory dir, parent_page
     Dir.entries( dir ).sort.each do |entry|
       if entry =~ /^\d\d\d_(.*)$/
@@ -134,7 +143,7 @@ extension."
   end
 
   def css name
-    "<link rel='stylesheet' href='#{relative_site_root}public/#{name}.css'" + 
+    "<link rel='stylesheet' href='#{@page.relative_site_root}public/#{name}.css'" + 
     " type='text/css'>"
   end
 
@@ -172,7 +181,7 @@ extension."
         o "<span class=\"current-page\">#{title}</span>"
       else
         if page.title && !page.title.empty?
-          o "<a href='#{relative_site_root}#{page.target}'>#{title}</a>"
+          o "<a href='#{@page.relative_site_root}#{page.target}'>#{title}</a>"
         end
       end
       on "</li>"
@@ -182,22 +191,7 @@ extension."
     end
     on "</ul>"
   end
-  
-  def relative_site_root
-    out = ""
-
-    effective_level = @page.level
-    if @page.file_basename == "index"
-      effective_level += 1
-    end
     
-    effective_level.times do
-      out += "../"
-    end
-    
-    out
-  end
-  
   protected
   
   def o txt
