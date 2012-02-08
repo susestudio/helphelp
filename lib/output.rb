@@ -77,7 +77,8 @@ extension."
             page = Page.new
             parent_page.add_child page
           end
-            
+
+          page.file_basename = file_basename
           page.path = input_path + "/" + entry
           page.content = File.read( input_path + "/" + entry )
           page.file_format = file_format
@@ -163,11 +164,19 @@ extension."
     on "<ul>"
     parent_page.children.each do |page|
       o "<li>"
-      if page.title && !page.title.empty?
-        o "<a href='#{relative_site_root}#{page.target}'>#{page.title}</a>"
+      title = page.title
+      if page.has_children?
+        title += " >"
+      end
+      if page == @page
+        o "<span class=\"current-page\">#{title}</span>"
+      else
+        if page.title && !page.title.empty?
+          o "<a href='#{relative_site_root}#{page.target}'>#{title}</a>"
+        end
       end
       on "</li>"
-      if page.has_children?        
+      if @page == page || ( page.has_children? && @page.has_parent( page ) )
         render_toc_section page
       end
     end
@@ -177,7 +186,12 @@ extension."
   def relative_site_root
     out = ""
 
-    @page.level.times do
+    effective_level = @page.level
+    if @page.file_basename == "index"
+      effective_level += 1
+    end
+    
+    effective_level.times do
       out += "../"
     end
     
