@@ -1,0 +1,30 @@
+# Helphelp - generating online help
+
+The helphelp tool takes a directory of files formatted using Markdown [1] and
+converts it to a set of static HTML pages. It supports the usual Markdown syntax
+and the extensions provided by Maruku [2].
+
+The Mardown converted to HTML is inserted into templates provided by helphelp or
+by the caller on the command line. The support a few additional features like
+generation of a table of contents.
+
+The structure of the source directory, its subdirectories, and the files in them
+is reflected in the generated output. As a convention the tool expects file and
+directory names to start with a three digit number. This number is used to
+define the sequence of files in the structure of the online help. The numbers
+don't show up in the output.
+
+Source files are expected to have the suffix ".md".
+
+Picture files which are referenced from the markdown are scaled and copied to
+the output destination at the same location in the directory hierarchy as they
+are in the sources.
+
+There are another few non-Markdown features which are supported in the source
+files by the helphelp tool. If you insert a "#dir_toc" at the beginning of a
+line, it is replaced by a table of contents for the content of the subdirectory
+the file is located.
+
+
+[1]: http://daringfireball.net/projects/markdown/
+[2]: http://maruku.rubyforge.org/
