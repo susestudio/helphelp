@@ -22,6 +22,10 @@ opt.on( "--pull", "Pull git before creating output" ) do
   do_pull = true
 end
 
+opt.on( "--raw-convert <file>", "Just run the raw markdown conversion on the given file" ) do |file|
+  puts Maruku.new( File.read file ).to_html
+end
+
 begin
   opt.parse!( ARGV )
 rescue OptionParser::InvalidOption
