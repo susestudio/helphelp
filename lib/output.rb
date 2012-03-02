@@ -13,7 +13,7 @@ class Output
       Dir::mkdir output_dir
     end
 
-    public_source_dir = File.expand_path("../../view/public", __FILE__)
+    public_source_dir = File.expand_path("_view/public", @input_repo )
     if File.exists? public_source_dir
       public_dir = File.expand_path( "public", output_dir )
       if !File.exists? public_dir
@@ -110,7 +110,7 @@ extension."
     end
   end
 
-  def create_pages parent_page
+    def create_pages parent_page
     parent_page.children.each do |page|
       if page.content
         create_page page
@@ -130,11 +130,11 @@ extension."
   def create_page page
     puts "CREATE PAGE #{page.path} #{page.output_file}"
     @page = page
-    create_file "../../view/template.haml", page.output_file
+    create_file "_view/template.haml", page.output_file
   end
   
   def create_file template_name, output_filename
-    template = File.read File.expand_path(template_name, __FILE__)
+    template = File.read File.expand_path(template_name, @input_repo )
     engine = Haml::Engine.new template
     
     File.open output_filename, "w" do |file|
