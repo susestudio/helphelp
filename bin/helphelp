@@ -43,7 +43,7 @@ end
 
 if do_pull
   puts "Updating git repository..."
-  cmd = "cd #{File.dirname input_repo}; git pull"
+  cmd = "cd #{input_repo}; git pull"
   system cmd
 end
 
