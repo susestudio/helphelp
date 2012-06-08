@@ -104,7 +104,7 @@ extension."
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
         system cmd
         cmd = "mogrify -resize #{@content_width}x5000 #{output_path}/#{entry}"
-        STDERR.puts "MOGRIFY: #{cmd}"
+        STDERR.puts "Resize picture: #{cmd}"
         system cmd
       end
     end
@@ -128,7 +128,7 @@ extension."
   end
   
   def create_page page
-    puts "CREATE PAGE #{page.path} #{page.output_file}"
+    STDERR.puts "Create page: #{page.path} -> #{page.output_file}"
     @page = page
     create_file "_view/template.haml", page.output_file
   end
