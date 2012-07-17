@@ -172,7 +172,11 @@ extension."
   def render_toc_section parent_page
     on "<ul>"
     parent_page.children.each do |page|
-      o "<li>"
+      if parent_page == @root_page
+        o "<li>"
+      else
+        o "<li class=\"sub-item\">"
+      end
       title = page.title
       if page.has_children?
         title += " >"
