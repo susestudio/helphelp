@@ -184,7 +184,6 @@ extension."
       
       title = page.title
       if page.has_children?
-        title += " >"
         item_classes.push "has-children"
         if page == @page
           item_classes.push "expanded"
