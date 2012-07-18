@@ -176,15 +176,27 @@ extension."
   def render_toc_section parent_page
     on "<ul>"
     parent_page.children.each do |page|
-      if parent_page == @root_page
-        o "<li>"
-      else
-        o "<li class=\"sub-item\">"
+      item_classes = []
+            
+      if parent_page != @root_page
+        item_classes.push "sub-item"
       end
+      
       title = page.title
       if page.has_children?
         title += " >"
+        item_classes.push "has-children"
+        if page == @page
+          item_classes.push "expanded"
+        end
       end
+
+      if item_classes.empty?
+        o "<li>"
+      else
+        o "<li class=\"#{item_classes.join " "}\">"
+      end
+
       if page == @page
         o "<span class=\"current-page\">#{title}</span>"
       else
