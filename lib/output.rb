@@ -154,9 +154,13 @@ extension."
   def render_content
     @out = ""
 
+    on "<div class=\"content page-#{@page.file_basename}\">"
+    
     doc = Maruku.new @page.content
-    o doc.to_html
+    on doc.to_html
 
+    on "</div>"
+    
     @out
   end
 
