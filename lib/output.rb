@@ -2,13 +2,13 @@ class Output
 
   def initialize input_repo
     @input_repo = input_repo
-    
+
     @content_width = 600
   end
 
   def create output_dir
     @output_dir = output_dir
-    
+
     if !File.exists? output_dir
       Dir::mkdir output_dir
     end
@@ -23,18 +23,18 @@ class Output
       cmd = "cp #{public_source_dir}/* #{public_dir}"
       system cmd
     end
-    
+
     @input_path = Array.new
     @output_path = Array.new
 
     @root_page = Page.new
     @root_page.directory_path = @output_path
     @root_page.level = -1
-    
+
     process_directory @input_repo, @root_page
 
     postprocess_page @root_page
-    
+
     create_pages @root_page
   end
 
@@ -44,10 +44,11 @@ class Output
       postprocess_page page
     end
   end
-  
+
   def process_directory dir, parent_page
     Dir.entries( dir ).sort.each do |entry|
-      if entry =~ /^\d\d\d_(.*)$/
+      case entry
+      when  /^\d\d\d_(.*)$/
         input_name = $1
         full_name = input_path + "/" + entry
         if File.directory?( full_name )
@@ -60,7 +61,7 @@ class Output
           page = Page.new
           parent_page.add_child page
           page.directory_path = full_name
-          
+
           process_directory full_name, page
           @input_path.pop
           @output_path.pop
@@ -100,11 +101,14 @@ extension."
           end
           page.output_file = output_path + "/" + output_file_name
         end
-      elsif entry =~ /.*\.png$/
+      when /.*\.png$/
         cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
         system cmd
         cmd = "mogrify -resize #{@content_width}x5000 #{output_path}/#{entry}"
         STDERR.puts "Resize picture: #{cmd}"
+        system cmd
+      when /.*\.xml$/
+        cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
         system cmd
       end
     end
@@ -122,45 +126,45 @@ extension."
   def input_path
     @input_repo + "/" + @input_path.join( "/" )
   end
-  
+
   def output_path
     @output_dir + "/" + @output_path.join( "/" )
   end
-  
+
   def create_page page
     STDERR.puts "Create page: #{page.path} -> #{page.output_file}"
     @page = page
     create_file "_view/template.haml", page.output_file
   end
-  
+
   def create_file template_name, output_filename
     template = File.read File.expand_path(template_name, @input_repo )
     engine = Haml::Engine.new template
-    
+
     File.open output_filename, "w" do |file|
       file.puts engine.render( binding )
     end
   end
 
   def css name
-    "<link rel='stylesheet' href='#{@page.relative_site_root}public/#{name}.css'" + 
+    "<link rel='stylesheet' href='#{@page.relative_site_root}public/#{name}.css'" +
     " type='text/css'>"
   end
 
   def title
     @page.title
   end
-  
+
   def render_content
     @out = ""
 
     on "<div class=\"content page-#{@page.file_basename}\">"
-    
+
     doc = Maruku.new @page.content
     on doc.to_html
 
     on "</div>"
-    
+
     @out
   end
 
@@ -172,16 +176,16 @@ extension."
 
     @out
   end
-  
+
   def render_toc_section parent_page
     on "<ul>"
     parent_page.children.each do |page|
       item_classes = []
-            
+
       if parent_page != @root_page
         item_classes.push "sub-item"
       end
-      
+
       title = page.title
       if page.has_children?
         item_classes.push "has-children"
@@ -210,9 +214,9 @@ extension."
     end
     on "</ul>"
   end
-    
+
   protected
-  
+
   def o txt
     @out += txt.to_s
   end
@@ -220,5 +224,5 @@ extension."
   def on txt
     o txt + "\n"
   end
-  
+
 end
