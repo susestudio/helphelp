@@ -72,12 +72,12 @@ class Output
             file_basename = $1
             file_format = $2
             if file_format != "md"
-              raise ParseError "Unsupported format '#{file_format}' in file " +
-                "#{input_name}."
+              raise ParseError, 
+                "Unsupported format '#{file_format}' in file #{input_name}."
             end
           else
-            raise ParseError "Input file #{input_name} doesn't have an
-extension."
+            raise ParseError, 
+              "Input file #{input_name} doesn't have an extension."
           end
 
           page = nil
