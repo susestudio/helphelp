@@ -22,6 +22,6 @@ Generator for turning a directory hierarchy of markdown files into a static
 set of HTML pages. It's targeted at providing online help for web application.
 desc
 
-  s.add_dependency "maruku"
+  s.add_dependency "maruku", '0.6.1'
   s.add_dependency "haml"
 end
