@@ -46,7 +46,7 @@ class Output
   end
 
   def is_backup?(entry)
-    return entry =~ /(.*)~/
+    return entry =~ /(.*)~$/
   end
 
   def process_directory dir, parent_page
