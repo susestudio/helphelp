@@ -5,6 +5,7 @@ require File.expand_path('../../lib/helphelp',__FILE__)
 output_dir = "html"
 do_pull = false
 input_repo = nil
+branch = false
 
 opt = OptionParser.new
 opt.banner = "Usage: helphelp <input-repository>"
@@ -20,6 +21,11 @@ end
 
 opt.on( "--pull", "Pull git before creating output" ) do
   do_pull = true
+end
+
+opt.on( "--branch <branch>", "Checkout a specific git branch" ) do |value|
+  do_pull = true
+  branch = value
 end
 
 opt.on( "--raw-convert <file>", "Just run the raw markdown conversion on the given file" ) do |file|
@@ -43,7 +49,8 @@ end
 
 if do_pull
   puts "Updating git repository..."
-  cmd = "cd #{input_repo}; git pull"
+  branch_cmd = branch ? "git fetch --all; git checkout #{branch} &&" : ""
+  cmd = "cd #{input_repo}; #{branch_cmd} git pull"
   system cmd
 end
 
