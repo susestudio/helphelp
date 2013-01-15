@@ -45,8 +45,13 @@ class Output
     end
   end
 
+  def is_backup?(entry)
+    return entry =~ /(.*)~$/
+  end
+
   def process_directory dir, parent_page
     Dir.entries( dir ).sort.each do |entry|
+      next if is_backup? entry
       case entry
       when  /^\d\d\d_(.*)$/
         input_name = $1
