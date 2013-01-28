@@ -110,7 +110,7 @@ class Output
         size = "#{@content_width}x5000"
         FileUtils.cp input, output
         cmd = ["mogrify", "-resize", size, output]
-        STDERR.puts "Resize picture: #{cmd.join ' '}"
+        STDERR.puts "Resize image: #{output} -> #{size}"
         system *cmd
       when /.*\.xml$/
         FileUtils.cp "#{input_path}/#{entry}", "#{output_path}/#{entry}"
