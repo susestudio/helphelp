@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class Output
 
   def initialize input_repo
@@ -20,8 +22,9 @@ class Output
         Dir::mkdir public_dir
       end
 
-      cmd = "cp #{public_source_dir}/* #{public_dir}"
-      system cmd
+      Dir.glob "#{public_source_dir}/*" do |path|
+        FileUtils.cp path, public_dir
+      end
     end
 
     @input_path = Array.new
@@ -102,14 +105,15 @@ class Output
           page.output_file = output_path + "/" + output_file_name
         end
       when /.*\.png$/
-        cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
-        system cmd
-        cmd = "mogrify -resize #{@content_width}x5000 #{output_path}/#{entry}"
-        STDERR.puts "Resize picture: #{cmd}"
-        system cmd
+        input = "#{input_path}/#{entry}"
+        output = "#{output_path}/#{entry}"
+        size = "#{@content_width}x5000"
+        FileUtils.cp input, output
+        cmd = ["mogrify", "-resize", size, output]
+        STDERR.puts "Resize picture: #{cmd.join ' '}"
+        system *cmd
       when /.*\.xml$/
-        cmd = "cp #{input_path}/#{entry} #{output_path}/#{entry}"
-        system cmd
+        FileUtils.cp "#{input_path}/#{entry}", "#{output_path}/#{entry}"
       end
     end
   end
