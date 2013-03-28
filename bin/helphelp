@@ -49,9 +49,13 @@ end
 
 if do_pull
   puts "Updating git repository..."
-  branch_cmd = branch ? "git fetch --all; git checkout #{branch} &&" : ""
-  cmd = "cd #{input_repo}; #{branch_cmd} git pull"
-  system cmd
+  Dir.chdir input_repo do
+    if branch
+      system 'git', 'fetch', '--all'
+      system 'git', 'checkout', branch
+    end
+    system 'git', 'pull'
+  end
 end
 
 puts "Reading repository #{input_repo}"
