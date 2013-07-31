@@ -15,6 +15,8 @@ class Output
       Dir::mkdir output_dir
     end
 
+    @watcher = ChangeWatcher.new @output_dir
+
     public_source_dir = File.expand_path("_view/public", @input_repo )
     if File.exists? public_source_dir
       public_dir = File.expand_path( "public", output_dir )
@@ -39,6 +41,8 @@ class Output
     postprocess_page @root_page
 
     create_pages @root_page
+    
+    @watcher.save
   end
 
   def postprocess_page parent_page
@@ -106,19 +110,21 @@ class Output
         end
       when /.*\.png$/
         input = "#{input_path}/#{entry}"
-        output = "#{output_path}/#{entry}"
-        size = "#{@content_width}x5000"
-        FileUtils.cp input, output
-        cmd = ["mogrify", "-resize", size, output]
-        STDERR.puts "Resize image: #{output} -> #{size}"
-        system *cmd
+        @watcher.run_if_changed input do
+          output = "#{output_path}/#{entry}"
+          size = "#{@content_width}x5000"
+          FileUtils.cp input, output
+          cmd = ["mogrify", "-resize", size, output]
+          STDERR.puts "Resize image: #{output} -> #{size}"
+          system *cmd
+        end
       when /.*\.xml$/
         FileUtils.cp "#{input_path}/#{entry}", "#{output_path}/#{entry}"
       end
     end
   end
 
-    def create_pages parent_page
+  def create_pages parent_page
     parent_page.children.each do |page|
       if page.content
         create_page page
